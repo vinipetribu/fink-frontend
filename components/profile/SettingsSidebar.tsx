@@ -10,11 +10,13 @@ interface SettingsSidebarProps {
     subtitle: string;
   }>;
   onLogout: () => void;
+  onSwitchAccount: () => void;
 }
 
 export function SettingsSidebar({
   settingsItems,
   onLogout,
+  onSwitchAccount,
 }: SettingsSidebarProps) {
   return (
     <div className="space-y-6">
@@ -36,8 +38,11 @@ export function SettingsSidebar({
       </Card>
 
       <Card className="bg-white p-6 shadow-sm">
-        <button className="flex w-full items-center gap-3 py-2 text-left text-sm text-slate-900 transition-opacity hover:opacity-70">
-          <FiRefreshCw className="text-slate-900" size={20} />
+        <button
+          onClick={onSwitchAccount}
+          className='flex w-full items-center gap-3 py-2 text-left text-sm text-slate-900 transition-opacity hover:opacity-70'
+        >
+          <FiRefreshCw className='text-slate-900' size={20} />
           <span>Trocar de conta</span>
         </button>
 
@@ -45,9 +50,9 @@ export function SettingsSidebar({
 
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-3 py-2 text-left text-sm text-red-600 transition-opacity hover:opacity-70"
+          className='flex w-full items-center gap-3 py-2 text-left text-sm text-red-600 transition-opacity hover:opacity-70'
         >
-          <FiLogOut className="text-red-600" size={20} />
+          <FiLogOut className='text-red-600' size={20} />
           <span>Sair</span>
         </button>
       </Card>

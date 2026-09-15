@@ -19,6 +19,11 @@ type ResponseInterceptor = (response: Response) => Response | Promise<Response>;
 const requestInterceptors: RequestInterceptor[] = [];
 const responseInterceptors: ResponseInterceptor[] = [];
 
+interface ApiError extends Error {
+  status: number;
+  details: unknown;
+}
+
 // Adicionar interceptors
 export const addRequestInterceptor = (interceptor: RequestInterceptor) => {
   requestInterceptors.push(interceptor);
@@ -49,6 +54,8 @@ const getAuthToken = (): string | null => {
 const clearAuthToken = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('sessionId');
   }
 };
 
@@ -85,7 +92,7 @@ const handleErrorResponse = async (response: Response): Promise<never> => {
     throw new Error('Token expirado. Faça login novamente.');
   }
 
-  const error = new Error(errorMessage) as any;
+  const error = new Error(errorMessage) as ApiError;
   error.status = response.status;
   error.details = errorDetails;
   throw error;
@@ -99,11 +106,13 @@ const fetchApi = async <T>(
   const { timeout = 10000, ...fetchConfig } = config;
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Headers padrão
-  let headers = new Headers({
-    'Content-Type': 'application/json',
-    ...fetchConfig.headers,
-  });
+  // O navegador precisa definir o boundary de requisições multipart.
+  const isFormData =
+    typeof FormData !== 'undefined' && fetchConfig.body instanceof FormData;
+  const headers = new Headers(fetchConfig.headers);
+  if (!isFormData && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   // Aplicar interceptors de request
   let requestConfig: RequestInit = { ...fetchConfig, headers };
@@ -149,21 +158,44 @@ export const api = {
   get: <T>(endpoint: string, config?: FetchConfig): Promise<T> =>
     fetchApi<T>(endpoint, { ...config, method: 'GET' }),
 
-  post: <T>(endpoint: string, data?: any, config?: FetchConfig): Promise<T> =>
+  post: <T>(
+    endpoint: string,
+    data?: unknown,
+    config?: FetchConfig
+  ): Promise<T> =>
     fetchApi<T>(endpoint, {
       ...config,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  put: <T>(endpoint: string, data?: any, config?: FetchConfig): Promise<T> =>
+  postForm: <T>(
+    endpoint: string,
+    data: FormData,
+    config?: FetchConfig
+  ): Promise<T> =>
+    fetchApi<T>(endpoint, {
+      ...config,
+      method: 'POST',
+      body: data,
+    }),
+
+  put: <T>(
+    endpoint: string,
+    data?: unknown,
+    config?: FetchConfig
+  ): Promise<T> =>
     fetchApi<T>(endpoint, {
       ...config,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  patch: <T>(endpoint: string, data?: any, config?: FetchConfig): Promise<T> =>
+  patch: <T>(
+    endpoint: string,
+    data?: unknown,
+    config?: FetchConfig
+  ): Promise<T> =>
     fetchApi<T>(endpoint, {
       ...config,
       method: 'PATCH',

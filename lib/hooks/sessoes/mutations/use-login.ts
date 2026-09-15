@@ -3,25 +3,24 @@
  * POST /api/v1/sessoes/login
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type { LoginData, LoginResponse } from '@/lib/api/types';
 
 export const useLogin = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: LoginData): Promise<LoginResponse> => {
       return api.post<LoginResponse>(API_ENDPOINTS.SESSOES.LOGIN, data);
     },
     onSuccess: (loginResponse) => {
-      // ✅ Salvar token no localStorage
       if (typeof window !== 'undefined') {
+        // Impede que dados da conta anterior permaneçam no perfil.
+        queryClient.removeQueries();
         localStorage.setItem('authToken', loginResponse.token);
-        // Opcional: salvar dados do usuário
-        localStorage.setItem(
-          'userId',
-          loginResponse.fk_pessoa_id_pessoa
-        );
+        localStorage.setItem('userId', loginResponse.fk_pessoa_id_pessoa);
         localStorage.setItem('sessionId', String(loginResponse.id_sessao));
       }
     },

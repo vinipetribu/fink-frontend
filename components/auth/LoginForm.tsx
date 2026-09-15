@@ -47,7 +47,7 @@ export const LoginForm = () => {
         // Redirecionar para home após login
         router.push('/home');
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         console.error('Login error:', error);
         setErrorMessage(
           error.message || 'Erro ao fazer login. Verifique suas credenciais.'

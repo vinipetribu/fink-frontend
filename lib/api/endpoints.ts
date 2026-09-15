@@ -59,6 +59,11 @@ export const API_ENDPOINTS = {
     TERMINATE_ALL: '/sessoes/terminate-all',
   },
 
+  // Uploads
+  UPLOADS: {
+    CSV: '/uploads/csv',
+  },
+
   // Assinaturas
   ASSINATURAS: {
     LIST: '/assinaturas',
@@ -108,7 +113,7 @@ export const API_ENDPOINTS = {
 // Helper para construir URLs com query parameters
 export const buildUrl = (
   endpoint: string,
-  params?: Record<string, any>
+  params?: Record<string, unknown>
 ): string => {
   if (!params || Object.keys(params).length === 0) {
     return endpoint;
