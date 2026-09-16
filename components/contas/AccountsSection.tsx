@@ -2,8 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, UserRound } from 'lucide-react';
 
 import { AccountCard, Bank } from './AccountCard';
 import PluggyButton from '@/components/home/PluggyButton';
@@ -47,7 +46,7 @@ function groupAccountsByBank(accounts: PluggyAccount[]): Bank[] {
     const status: 'active' | 'inactive' =
       acc.status?.toLowerCase() === 'inactive' ? 'inactive' : 'active';
 
-    const raw = (acc as any).number ?? (acc as any).accountNumber;
+    const raw: unknown = acc.number ?? acc.accountNumber;
     const displayNumber =
       typeof raw === 'string' && raw.length > 0
         ? raw
@@ -129,22 +128,18 @@ export function AccountsSection() {
             {/* Painel lateral */}
             <aside className="flex w-full flex-col gap-5 rounded-3xl border border-slate-100 bg-white px-6 py-6 shadow-sm lg:w-80">
               <div className="flex items-center gap-4">
-                {/* FOTO DE PERFIL */}
-                <div className="h-16 w-16 overflow-hidden rounded-full bg-slate-200">
-                  <Image
-                    src="/images/profile/Foto Gabriel.jpg"
-                    alt="Foto de perfil"
-                    width={64}
-                    height={64}
-                    className="h-full w-full object-cover"
-                  />
+                <div
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-slate-600"
+                  aria-label="Avatar genérico"
+                >
+                  <UserRound aria-hidden="true" className="h-8 w-8" />
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-slate-900">
-                    Gabriel Bezerra de Andrade
+                    Pessoa fictícia do laboratório
                   </p>
                   <p className="text-base text-slate-600">
-                    123.456.789-10
+                    Identidade ilustrativa, não vinculada à sessão
                   </p>
                 </div>
               </div>
