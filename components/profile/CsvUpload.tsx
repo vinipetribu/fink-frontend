@@ -8,10 +8,25 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SpinLoader } from '@/components/shared/SpinLoader';
 
+const CATEGORIES = [
+  'Alimentação',
+  'Transporte',
+  'Moradia',
+  'Saúde',
+  'Educação',
+  'Lazer',
+  'Outros',
+] as const;
+
+type TransactionCategory = (typeof CATEGORIES)[number];
+
 interface CsvPreviewRow {
   data: string;
   descricao: string;
   valor: string;
+  categoria_sugerida: TransactionCategory;
+  confianca: number;
+  revisao_necessaria: boolean;
 }
 
 interface CsvUploadResponse {
@@ -19,6 +34,7 @@ interface CsvUploadResponse {
   sha256: string;
   quantidade_registros: number;
   previa: CsvPreviewRow[];
+  resumo_categorias: Record<TransactionCategory, number>;
 }
 
 export function CsvUpload() {
@@ -66,6 +82,10 @@ export function CsvUpload() {
         </h2>
         <p className='mt-1 text-sm text-slate-600'>
           Envie um CSV com as colunas data, descricao e valor.
+        </p>
+        <p className='mt-2 text-sm text-slate-600'>
+          As categorias são sugestões da IA e devem ser revisadas antes de
+          qualquer decisão.
         </p>
       </div>
 
@@ -121,6 +141,25 @@ export function CsvUpload() {
             </div>
           </div>
 
+          <div>
+            <h3 className='mb-2 font-medium text-slate-900'>
+              Resumo por categoria
+            </h3>
+            <div className='grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4'>
+              {CATEGORIES.map((category) => (
+                <div
+                  key={category}
+                  className='rounded-md border border-slate-200 px-3 py-2'
+                >
+                  <span className='text-slate-600'>{category}</span>{' '}
+                  <strong className='text-slate-900'>
+                    {result.resumo_categorias[category]}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {result.previa.length > 0 && (
             <div className='overflow-x-auto'>
               <h3 className='mb-2 font-medium text-slate-900'>Prévia</h3>
@@ -130,6 +169,9 @@ export function CsvUpload() {
                     <th className='px-2 py-2 font-medium'>Data</th>
                     <th className='px-2 py-2 font-medium'>Descrição</th>
                     <th className='px-2 py-2 font-medium'>Valor</th>
+                    <th className='px-2 py-2 font-medium'>Categoria sugerida</th>
+                    <th className='px-2 py-2 font-medium'>Confiança</th>
+                    <th className='px-2 py-2 font-medium'>Revisão</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -141,6 +183,22 @@ export function CsvUpload() {
                       <td className='px-2 py-2'>{row.data}</td>
                       <td className='px-2 py-2'>{row.descricao}</td>
                       <td className='px-2 py-2'>{row.valor}</td>
+                      <td className='px-2 py-2'>{row.categoria_sugerida}</td>
+                      <td className='px-2 py-2'>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'percent',
+                          maximumFractionDigits: 1,
+                        }).format(row.confianca)}
+                      </td>
+                      <td className='px-2 py-2'>
+                        {row.revisao_necessaria ? (
+                          <span className='inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800'>
+                            Revisão necessária
+                          </span>
+                        ) : (
+                          <span className='text-slate-500'>Não sinalizada</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
