@@ -17,6 +17,7 @@ export const Navbar = () => {
     { href: '/movimentacoes', label: 'Movimentações' },
     { href: '/home', label: 'Espaço Finker' },
     { href: '/metas', label: 'Metas' },
+    { href: '/admin/pessoas', label: 'Administração' },
     { href: '/academy', label: 'Academy', disabled: true },
   ];
 

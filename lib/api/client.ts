@@ -8,6 +8,8 @@ const API_BASE_URL =
 
 export interface FetchConfig extends RequestInit {
   timeout?: number;
+  redirectOnUnauthorized?: boolean;
+  onResponse?: (response: Response) => void;
 }
 
 // Interceptor para adicionar headers automaticamente
@@ -63,7 +65,10 @@ const clearAuthToken = (): void => {
 addRequestInterceptor(authInterceptor);
 
 // Função para tratar erros de resposta
-const handleErrorResponse = async (response: Response): Promise<never> => {
+const handleErrorResponse = async (
+  response: Response,
+  redirectOnUnauthorized = true
+): Promise<never> => {
   let errorMessage = `HTTP Error: ${response.status}`;
   let errorDetails = null;
 
@@ -86,7 +91,7 @@ const handleErrorResponse = async (response: Response): Promise<never> => {
   if (response.status === 401) {
     clearAuthToken();
     // Redirecionar para login se necessário
-    if (typeof window !== 'undefined') {
+    if (redirectOnUnauthorized && typeof window !== 'undefined') {
       window.location.href = '/login';
     }
     throw new Error('Token expirado. Faça login novamente.');
@@ -103,7 +108,12 @@ const fetchApi = async <T>(
   endpoint: string,
   config: FetchConfig = {}
 ): Promise<T> => {
-  const { timeout = 10000, ...fetchConfig } = config;
+  const {
+    timeout = 10000,
+    redirectOnUnauthorized = true,
+    onResponse,
+    ...fetchConfig
+  } = config;
   const url = `${API_BASE_URL}${endpoint}`;
 
   // O navegador precisa definir o boundary de requisições multipart.
@@ -137,8 +147,10 @@ const fetchApi = async <T>(
       response = await interceptor(response);
     }
 
+    onResponse?.(response);
+
     if (!response.ok) {
-      await handleErrorResponse(response);
+      await handleErrorResponse(response, redirectOnUnauthorized);
     }
 
     return await response.json();
