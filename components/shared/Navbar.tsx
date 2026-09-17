@@ -2,22 +2,40 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCurrentPessoa } from '@/lib/hooks/pessoas';
+import { useAuth } from '@/lib/hooks/sessoes';
 
 interface NavLink {
   href: string;
   label: string;
   disabled?: boolean;
+  adminOnly?: boolean;
 }
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  const {
+    data: pessoa,
+    isLoading,
+    isFetching,
+    isError,
+  } = useCurrentPessoa({
+    enabled: isAuthenticated,
+  });
+  const isAdmin =
+    isAuthenticated &&
+    !isLoading &&
+    !isFetching &&
+    !isError &&
+    pessoa?.admin === true;
 
   const navLinks: NavLink[] = [
     { href: '/categorias', label: 'Categorias', disabled: true },
     { href: '/movimentacoes', label: 'Movimentações' },
     { href: '/home', label: 'Espaço Finker' },
     { href: '/metas', label: 'Metas' },
-    { href: '/admin/pessoas', label: 'Administração' },
+    { href: '/admin/pessoas', label: 'Administração', adminOnly: true },
     { href: '/academy', label: 'Academy', disabled: true },
   ];
 
@@ -46,6 +64,8 @@ export const Navbar = () => {
   return (
     <nav className='hidden md:flex items-center gap-6 border-b-2 border-[#D1D2D9] pb-4 pt-2 '>
       {navLinks.map((link) => {
+        if (link.adminOnly && !isAdmin) return null;
+
         const className = getLinkClassName(link.href, link.disabled);
         const active = isActive(link.href);
 

@@ -13,13 +13,13 @@ export const useAuth = () => {
   const router = useRouter();
 
   // ✅ Valida token com a API
-  const { data: session, isLoading, isError } = useValidateSession();
+  const { data: session, isLoading, isError, isEnabled } = useValidateSession();
 
   // ✅ Hook de logout que chama a API
   const { mutate: logoutMutation, isPending: isLoggingOut } = useLogout();
 
-  // ✅ Estado de autenticação baseado na validação da API
-  const isAuthenticated = !isLoading && !isError && !!session;
+  // Uma sessão antiga em cache, sem token para validá-la, não autentica.
+  const isAuthenticated = isEnabled && !isLoading && !isError && !!session;
 
   const logout = () => {
     logoutMutation(undefined, {

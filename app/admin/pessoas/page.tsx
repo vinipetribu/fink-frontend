@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { SecurityLogs } from '@/components/admin/SecurityLogs';
 import { SpinLoader } from '@/components/shared/SpinLoader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -153,6 +154,8 @@ export default function AdminPessoasPage() {
           )}
         </div>
       </Card>
+
+      <SecurityLogs />
     </div>
   );
 }

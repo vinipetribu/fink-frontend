@@ -4,6 +4,10 @@
  */
 
 export const API_ENDPOINTS = {
+  SECURITY_LOGS: {
+    LIST: '/security-logs/',
+  },
+
   // Pessoas
   PESSOAS: {
     LIST: '/pessoas',
