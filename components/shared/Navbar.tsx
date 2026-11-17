@@ -35,6 +35,7 @@ export const Navbar = () => {
     { href: '/movimentacoes', label: 'Movimentações' },
     { href: '/home', label: 'Espaço Finker' },
     { href: '/metas', label: 'Metas' },
+    { href: '/secureai-lab', label: 'SecureAI Lab' },
     { href: '/admin/pessoas', label: 'Administração', adminOnly: true },
     { href: '/academy', label: 'Academy', disabled: true },
   ];

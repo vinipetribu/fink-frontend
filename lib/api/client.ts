@@ -8,6 +8,7 @@ const API_BASE_URL =
 
 export interface FetchConfig extends RequestInit {
   timeout?: number;
+  suppressErrorLog?: boolean;
   redirectOnUnauthorized?: boolean;
   onResponse?: (response: Response) => void;
 }
@@ -67,7 +68,8 @@ addRequestInterceptor(authInterceptor);
 // Função para tratar erros de resposta
 const handleErrorResponse = async (
   response: Response,
-  redirectOnUnauthorized = true
+  redirectOnUnauthorized = true,
+  suppressErrorLog = false
 ): Promise<never> => {
   let errorMessage = `HTTP Error: ${response.status}`;
   let errorDetails = null;
@@ -78,7 +80,7 @@ const handleErrorResponse = async (
     errorMessage = errorData.message || errorData.detail || errorMessage;
 
     // ✅ Log detalhado do erro para debug
-    console.error('🔴 API Error Details:', {
+    if (!suppressErrorLog) console.error('🔴 API Error Details:', {
       status: response.status,
       statusText: response.statusText,
       data: errorData,
@@ -111,6 +113,7 @@ const fetchApi = async <T>(
   const {
     timeout = 10000,
     redirectOnUnauthorized = true,
+    suppressErrorLog = false,
     onResponse,
     ...fetchConfig
   } = config;
@@ -150,7 +153,7 @@ const fetchApi = async <T>(
     onResponse?.(response);
 
     if (!response.ok) {
-      await handleErrorResponse(response, redirectOnUnauthorized);
+      await handleErrorResponse(response, redirectOnUnauthorized, suppressErrorLog);
     }
 
     return await response.json();
